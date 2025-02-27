@@ -1,0 +1,17 @@
+#header {
+    min-height:50px;
+    color:aliceblue;
+    background-color: lightcoral;
+}
+
+div.breadcrumbs {
+    background: orangered;
+}
+
+div.breadcrumbs a {
+    color:blue;
+}
+
+.module caption {
+    background-color: mediumaquamarine;
+}
