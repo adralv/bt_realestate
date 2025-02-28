@@ -34,7 +34,7 @@ SECRET_KEY = 'django-insecure-49-e2azv#fpdlc=&27zds%sw_v%k_s1$kcvfsebud#g=@18&m7
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['btrealestate-production-d0f6.up.railway.app', ]
 
 
 # Application definition
