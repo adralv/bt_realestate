@@ -13,19 +13,39 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 
+from supabase import create_client
 from dotenv import load_dotenv
-
+# Load environment variables from .env file
 load_dotenv()
+
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_HOST = os.getenv('DB_HOST')
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 SECRET_KEY = os.getenv('SECRET_KEY')
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVmemlyaHV6bWZyZ3J6ZndlenNhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MjIxOTQwNCwiZXhwIjoyMDU3Nzk1NDA0fQ.O4GQ-PjynLYJPzCGNwWxlL7JWtuaV2N_Sx4Xi8yCrv8"
+# SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+# Ensure SUPABASE_URL is not None
+if not SUPABASE_URL:
+    raise ValueError("SUPABASE_URL is not set in environment variables")
+# Create Supabase Client
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+# Correct MEDIA_URL format
+MEDIA_URL = f"{SUPABASE_URL}/storage/v1/object/public/media/"
+
+
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+# Ensure these variables are defined
+if not DB_PASSWORD:
+    raise ValueError("No DB_PASSWORD set for Django application")
+if not DB_HOST:
+    raise ValueError("No DB_HOST set for Django application")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -35,9 +55,11 @@ SECRET_KEY = SECRET_KEY
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['btrealestate-production-d0f6.up.railway.app', 'localhost', '127.0.0.1']
-# csrf for railway
-CSRF_TRUSTED_ORIGINS = ['https://btrealestate-production-d0f6.up.railway.app',]
+ALLOWED_HOSTS = ['btrealestate-production-8a0f.up.railway.app','localhost', '127.0.0.1']
+#CSRF FOR RAILWAY.APP
+CSRF_TRUSTED_ORIGINS = [
+    'https://btrealestate-production-8a0f.up.railway.app'
+]
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
@@ -50,23 +72,24 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.humanize',
     'pages',
     'listings',
     'realtors',
     'accounts',
     'contacts',
+    'django.contrib.humanize'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware'
+
 ]
 
 ROOT_URLCONF = 'btre.urls'
@@ -93,26 +116,22 @@ WSGI_APPLICATION = 'btre.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'btre_backup',
         'USER': 'avnadmin',
         'PASSWORD': DB_PASSWORD,
-        'PORT': '23395',
         'HOST': DB_HOST,
+        'PORT': '22740',
     }
 }
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'defaultdb',
-#         'USER': 'avnadmin',
-#         'PASSWORD': 'AVNS_uDm7ahlilE6P_z9c_YB',
-#         'PORT': '23395',
-#         'HOST': 'pg-5051faa-bergen-treb.i.aivencloud.com',
-#     }
-# }
 
 
 # Password validation
@@ -154,26 +173,27 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'btre/static')
 ]
-
-# media folder
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Media Folder Settings
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = 'media/'
+# MEDIA_URL = 'media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# messages
+# Messages
 from django.contrib.messages import constants as messages
 
 MESSAGE_TAGS = {
     messages.ERROR: "danger",
 }
 
-
+# Email Settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_USE_TLS = True  # Use TLS encryption
-DEFAULT_FROM_EMAIL = 'your_email@gmail.com'  # Optional, but useful for consistency
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = EMAIL_HOST_USER  # Replace with your Gmail address
+EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD  # Use the App Password generated from Google
